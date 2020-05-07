@@ -13,7 +13,7 @@ based on the **configuration value** and **input parameter**.
 
 ## Getting Started
 
-This template requires [Node.js](https://nodejs.org/) v12.14.1+ to run.
+This sample requires [Node.js](https://nodejs.org/) v12.14.1+ to build.
 Install the dependencies and devDependencies:
 
 ```bash
