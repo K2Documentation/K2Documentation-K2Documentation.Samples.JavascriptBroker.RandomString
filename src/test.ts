@@ -17,28 +17,43 @@ test('describe returns the hardcoded instance', async t => {
     
     t.deepEqual(schema, {
         objects: {
-            "randomstring": { 
-                displayName: "Random String", 
-                description: "Utility for generating random strings", 
+            "todo": {
+                displayName: "TODO",
+                description: "Manages a TODO list",
                 properties: {
-                    "returnString": { 
-                        displayName: "Return string", 
-                        type: "string" 
+                    "id": {
+                        displayName: "ID",
+                        type: "number"
+                    },
+                    "userId": {
+                        displayName: "User ID",
+                        type: "number"
+                    },
+                    "title": {
+                        displayName: "Title",
+                        type: "string"
+                    },
+                    "completed": {
+                        displayName: "Completed",
+                        type: "boolean"
                     }
                 },
-                methods: { 
-                    "generateCode": {
-                        displayName: "Generate Access Code", 
-                        type: "execute", 
-                        parameters: { 
-                            "pCharacters" : { 
-                                displayName: "Length",
-                                description: "The number of characters 5-8 in the returned string",
-                                type: "number" } 
-                        },
-                        requiredParameters: [ "pCharacters" ], 
-                        outputs: [ "returnString" ] 
+                methods: {
+                    "get": {
+                        displayName: "Get TODO",
+                        type: "read",
+                        inputs: [ "id" ],
+                        outputs: [ "id", "userId", "title", "completed" ]
                     },
+                    "getParams": {
+                        displayName: "Get TODO",
+                        type: "read",
+                        parameters: {
+                            "pid" : { displayName: "param1", description: "Description Of Param 1", type: "number"} 
+                        },
+                        requiredParameters: [ "pid" ],
+                        outputs: [ "id" ]
+                    }
                 }
             }
         }
@@ -48,11 +63,23 @@ test('describe returns the hardcoded instance', async t => {
 });
 
 test('execute fails with the wrong parameters', async t => {
-    let error = await t.throwsAsync(Promise.resolve<void>(onexecute('test1', 'unused', {}, {}, {})));
+    let error = await t.throwsAsync(Promise.resolve<void>(onexecute({
+        objectName: 'test1',
+        methodName: 'unused',
+        parameters: {},
+        properties: {},
+        schema: {}
+    })));
     
     t.deepEqual(error.message, 'The object test1 is not supported.');
 
-    error = await t.throwsAsync(Promise.resolve<void>(onexecute('randomString', 'test2', {}, {}, {})));
+    error = await t.throwsAsync(Promise.resolve<void>(onexecute({
+        objectName: 'todo',
+        methodName: 'test2',
+        parameters: {},
+        properties: {},
+        schema: {}
+    })));
     
     t.deepEqual(error.message, 'The method test2 is not supported.');
 
@@ -67,13 +94,19 @@ test('execute passes with method params', async t => {
 
     mock('postResult', pr);
 
-    await Promise.resolve<void>(onexecute(
-        'randomstring', 'getParams', {
-            "pid": 456
-        }, {}, {}));
+    await Promise.resolve<void>(onexecute({
+        objectName: 'todo',
+        methodName: 'getParams',
+        parameters: {
+            pid: 456
+        },
+        properties: {},
+        configuration: {},
+        schema: {}
+    }));
 
     t.deepEqual(result, {
-        "id": 456
+        id: 456
     });
 
     t.pass();
@@ -128,10 +161,16 @@ test('execute passes', async t => {
 
     mock('postResult', pr);
 
-    await Promise.resolve<void>(onexecute(
-        'todo', 'get', {}, {
+    await Promise.resolve<void>(onexecute({
+        objectName: 'todo',
+        methodName: 'get',
+        parameters: {},
+        properties: {
             "id": 123
-        }, {}));
+        },
+        configuration: {},
+        schema: {}
+    }));
 
     t.deepEqual(xhr, {
         opened: {
@@ -144,10 +183,10 @@ test('execute passes', async t => {
     });
 
     t.deepEqual(result, {
-        "id": 123,
-        "userId": 51,
-        "title": "Groceries",
-        "completed": false
+        id: 123,
+        userId: 51,
+        title: "Groceries",
+        completed: false
     });
 
     t.pass();

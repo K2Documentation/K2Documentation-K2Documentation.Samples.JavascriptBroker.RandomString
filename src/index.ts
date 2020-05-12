@@ -13,7 +13,7 @@ metadata = {
     },
 };
 
-ondescribe = async function(): Promise<void> {
+ondescribe = function() {
     postSchema({ // this section is the schema describing the K2 service
         objects: {
             "randomstring": { //service object system name
@@ -44,38 +44,35 @@ ondescribe = async function(): Promise<void> {
     });
 }
 
-onexecute = async function (objectName, methodName, parameters, properties, configuration):  Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+onexecute = function ({parameters, configuration}) {
+    var strType = '';   // the switch statement defines the character set to use for the return string,  
+                        // based on the service key defined in the metadata section (stringFormat)
+    switch(configuration["stringFormat"]){
+        case "Alphabetic":
+            strType = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            break;
+        case "Numeric":
+            strType = "0123456789";
+            break;
+        case "Alphanumeric":
+            strType = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            break;
+        default:
+            strType = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    }
 
-        var strType = '';   // the switch statement defines the character set to use for the return string,  
-                            // based on the service key defined in the metadata section (stringFormat)
-        switch(configuration["stringFormat"]){
-            case "Alphabetic":
-                strType = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-                break;
-            case "Numeric":
-                strType = "0123456789";
-                break;
-            case "Alphanumeric":
-                strType = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                break;
-            default:
-                strType = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        }
+    var passw = '';
+    var stringlength = parameters["pCharacters"];    
 
-        var passw = '';
-        var stringlength = parameters["pCharacters"];    
-
-        for (let i = 1; i <= stringlength; i++) { // the for loop to generate characters 
-            var char = Math.floor(Math.random() 
-                * strType.length + 1); 
-          
-            passw += strType.charAt(char) // the characters that make up the returned string
-        } 
-            
-        postResult({  // the string that gets passed back to K2
-            "returnString": passw
-        });
+    for (let i = 1; i <= stringlength; i++) { // the for loop to generate characters 
+        var char = Math.floor(Math.random() 
+            * strType.length + 1); 
+        
+        passw += strType.charAt(char) // the characters that make up the returned string
+    } 
+        
+    postResult({  // the string that gets passed back to K2
+        "returnString": passw
     });
 }
  
